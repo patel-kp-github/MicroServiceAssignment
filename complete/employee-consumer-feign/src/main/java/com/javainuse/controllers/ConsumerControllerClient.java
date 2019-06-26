@@ -21,30 +21,15 @@ public class ConsumerControllerClient {
 
 	final static Logger logger= Logger.getLogger(ConsumerControllerClient.class);
 	@Autowired
-	private DiscoveryClient discoveryClient;
+	private RemoteCallService loadBalancer;
 
 	public void getEmployee() throws RestClientException, IOException {
 
-		List<ServiceInstance> instances = discoveryClient.getInstances("employee-producer");
-		ServiceInstance serviceInstance = instances.get(0);
-
-		String baseUrl = serviceInstance.getUri().toString();
-
-		baseUrl = baseUrl + "/employee";
-
-		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<String> response = null;
 		try {
-			response = restTemplate.exchange(baseUrl, HttpMethod.GET, getHeaders(), String.class);
+			Employee emp = loadBalancer.getData();
+			System.out.println(emp.getEmpId());
 		} catch (Exception ex) {
-			logger.info(ex);
+			System.out.println(ex);
 		}
-		logger.info("log info: "+response.getBody());
-	}
-
-	private static HttpEntity<?> getHeaders() throws IOException {
-		HttpHeaders headers = new HttpHeaders();
-		headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
-		return new HttpEntity<>(headers);
 	}
 }
